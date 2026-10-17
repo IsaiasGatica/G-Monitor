@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "serial-monitor": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["C:/herramientas/G-Monitor/packages/daemon/dist/index.js"],
+      "env": {
+        "SERIAL_PORT": "COM3",
+        "SERIAL_BAUD": "115200",
+        "SERIAL_DTR": "false",
+        "SERIAL_RTS": "false",
+        "SERIAL_BUFFER_SIZE": "2000",
+        "SERIAL_UI_EXECUTABLE": "C:/herramientas/G-Monitor/apps/desktop/src-tauri/target/release/serial-monitor.exe"
+      }
+    }
+  }
+}

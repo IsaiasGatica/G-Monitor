@@ -1,0 +1,20 @@
+{
+  "name": "claude-serial-monitor", "version": "0.1.0", "private": true,
+  "workspaces": ["packages/daemon", "apps/desktop"],
+  "scripts": {
+    "build": "npm run build -w @serial-monitor/daemon && npm run build -w @serial-monitor/desktop",
+    "test": "npm run test -w @serial-monitor/daemon",
+    "dev:daemon": "npm run dev -w @serial-monitor/daemon",
+    "dev:ui": "npm run tauri:dev -w @serial-monitor/desktop",
+    "build:desktop": "npm run tauri:build -w @serial-monitor/desktop",
+    "demo": "node scripts/demo.mjs",
+    "start": "node scripts/start-service.mjs",
+    "start:mock": "node scripts/start-service.mjs --mock",
+    "stop": "node scripts/stop-service.mjs",
+    "configure:claude": "node scripts/configure-integrations.mjs --claude",
+    "configure:codex": "node scripts/configure-integrations.mjs --codex",
+    "configure:antigravity": "node scripts/configure-integrations.mjs --antigravity",
+    "prepare:test-pc": "node scripts/prepare-test-pc.mjs"
+  },
+  "engines": {"node": ">=22"}
+}
