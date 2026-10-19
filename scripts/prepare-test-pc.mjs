@@ -30,7 +30,8 @@ for (const path of listing.split(/\r?\n/)) {
 }
 for (const module of modules) {const target=join(destination,'node_modules',module);await mkdir(dirname(target),{recursive:true});await cp(join(root,'node_modules',module),target,{recursive:true,dereference:true});}
 await writeFile(join(destination,'package.json'),JSON.stringify({name:'g-monitor-local-test',version,private:true,type:'module'}));
-await cp(join(root,'docs/test-pc.md'),join(destination,'INSTRUCCIONES.md'));
+const instructions=(await readFile(join(root,'docs/test-pc.md'),'utf8')).replace('(hybrid-test.md)','(docs/hybrid-test.md)');
+await writeFile(join(destination,'INSTRUCCIONES.md'),instructions);
 await writeFile(join(destination,'BUILD.json'),JSON.stringify({name,version,builtAt:new Date().toISOString(),platform:process.platform,arch:process.arch,node:process.version,sourceCommit:process.env.G_MONITOR_SOURCE_COMMIT || null},null,2)+'\n');
 await writeFile(join(destination,'Abrir-G-Monitor.cmd'),'@echo off\r\n"%~dp0node.exe" "%~dp0scripts\\start-service.mjs"\r\nif errorlevel 1 pause\r\n');
 await writeFile(join(destination,'Detener-G-Monitor.cmd'),'@echo off\r\n"%~dp0node.exe" "%~dp0scripts\\stop-service.mjs"\r\nif errorlevel 1 pause\r\n');
