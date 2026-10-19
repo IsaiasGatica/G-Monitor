@@ -81,6 +81,7 @@ export function SettingsSidebar({open, onClose, fontSizes, onFontSizesChange, ke
           <button onClick={() => onThemeColorsChange({...defaultTheme})}>Reset colors</button>
         </div>
       </section>
+      <footer className="settings-footer">Isaias Gatica - Argentina - v0.1</footer>
     </div>
   </dialog>;
 }

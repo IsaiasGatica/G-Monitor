@@ -3,6 +3,7 @@ dist/
 target/
 apps/desktop/src-tauri/gen/
 .session/
+.sessions/
 test-pc/
 backups/
 tmp/

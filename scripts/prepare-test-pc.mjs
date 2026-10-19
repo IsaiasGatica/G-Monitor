@@ -1,14 +1,23 @@
-import { cp,mkdir,writeFile,stat } from 'node:fs/promises';
+import { cp,mkdir,writeFile,stat,readFile,readdir } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
-import { join,relative,dirname } from 'node:path';
+import { join,relative,dirname,basename } from 'node:path';
 import { root } from './service.mjs';
 if (process.platform !== 'win32' || process.arch !== 'x64') throw new Error('Este paquete de prueba requiere Windows x64.');
-const destination=join(root,'test-pc',`G-Monitor-test-${Date.now()}`);
+const nameIndex=process.argv.indexOf('--name');
+const name=nameIndex<0 ? `G-Monitor-test-${Date.now()}` : process.argv[nameIndex+1];
+if(!name || !/^G-Monitor-test-[A-Za-z0-9._-]+$/.test(name)) throw new Error('Nombre de paquete inválido. Usar --name G-Monitor-test-VERSION.');
+const destination=join(root,'test-pc',name);
+const version=JSON.parse(await readFile(join(root,'package.json'),'utf8')).version;
+const connection=await readFile(join(root,'plugins/claude-g-monitor/hooks/connection.js'),'utf8');
+if(!/^export const CONNECTION = null;$/m.test(connection)) throw new Error('El plugin fuente contiene una conexión configurada; no se puede compartir.');
 await stat(join(root,'apps/desktop/src-tauri/target/release/serial-monitor.exe'));
 await stat(join(root,'packages/daemon/dist/index.js'));
-await mkdir(destination,{recursive:true});
-for (const path of ['packages/daemon/dist','scripts','docs','plugins/claude-g-monitor','apps/desktop/src-tauri/target/release/serial-monitor.exe']) {
-  const target=join(destination,path);await mkdir(dirname(target),{recursive:true});await cp(join(root,path),target,{recursive:true});
+await mkdir(dirname(destination),{recursive:true});
+await mkdir(destination);
+const excluded=/(?:^|[\\/])(?:\.sessions?|\.git|\.codex|\.agents|backups|tmp|test-pc)(?:[\\/]|$)|(?:^|[\\/])\.env(?:\.|$)|\.(?:log|bak|tmp|pfx|p12|key|pem)$/i;
+const runtimeScripts=['service.mjs','start-service.mjs','stop-service.mjs','configure-integrations.mjs','antigravity-hook.mjs','antigravity-sidecar.mjs','install-claude-plugin.ps1','demo.mjs'];
+for (const path of ['packages/daemon/dist','docs','plugins/claude-g-monitor','apps/desktop/src-tauri/target/release/serial-monitor.exe',...runtimeScripts.map(name=>`scripts/${name}`)]) {
+  const target=join(destination,path);await mkdir(dirname(target),{recursive:true});await cp(join(root,path),target,{recursive:true,filter:source=>!excluded.test(relative(root,source))});
 }
 await cp(process.execPath,join(destination,'node.exe'));
 const listing=execFileSync('cmd.exe',['/d','/s','/c','npm ls --omit=dev --parseable --all -w @serial-monitor/daemon'],{cwd:root,encoding:'utf8',windowsHide:true});
@@ -20,15 +29,23 @@ for (const path of listing.split(/\r?\n/)) {
   const parts=local.split('/');modules.add(parts[0].startsWith('@') ? parts.slice(0,2).join('/') : parts[0]);
 }
 for (const module of modules) {const target=join(destination,'node_modules',module);await mkdir(dirname(target),{recursive:true});await cp(join(root,'node_modules',module),target,{recursive:true,dereference:true});}
-await writeFile(join(destination,'package.json'),JSON.stringify({name:'g-monitor-local-test',version:'0.1.0',private:true,type:'module'}));
+await writeFile(join(destination,'package.json'),JSON.stringify({name:'g-monitor-local-test',version,private:true,type:'module'}));
+await cp(join(root,'docs/test-pc.md'),join(destination,'INSTRUCCIONES.md'));
+await writeFile(join(destination,'BUILD.json'),JSON.stringify({name,version,builtAt:new Date().toISOString(),platform:process.platform,arch:process.arch,node:process.version,sourceCommit:process.env.G_MONITOR_SOURCE_COMMIT || null},null,2)+'\n');
 await writeFile(join(destination,'Abrir-G-Monitor.cmd'),'@echo off\r\n"%~dp0node.exe" "%~dp0scripts\\start-service.mjs"\r\nif errorlevel 1 pause\r\n');
 await writeFile(join(destination,'Detener-G-Monitor.cmd'),'@echo off\r\n"%~dp0node.exe" "%~dp0scripts\\stop-service.mjs"\r\nif errorlevel 1 pause\r\n');
 await writeFile(join(destination,'LEEME.txt'),'\ufeff'+[
   'Paquete de prueba local, no release. Windows x64. Incluye Node; no requiere npm ni Rust en destino. La ventana requiere WebView2.',
   '1. Copiar TODA esta carpeta a una ubicación estable y escribible en la otra PC. No copiar .session de otra PC.',
   '2. Ejecutar Abrir-G-Monitor.cmd.',
+  'Extraer el ZIP completo antes de abrir. No ejecutar desde dentro del ZIP ni mover la carpeta después de configurar agentes.',
+  'Instrucciones completas, actualización y solución de problemas: INSTRUCCIONES.md (también docs/test-pc.md).',
   'Para otra ventana: botón + de la cabecera, antes del botón de agentes. Hereda el proyecto y el chat vinculado; tiene su propio log y empieza sin COM seleccionado.',
   'Cambiar el chat del padre no cambia el destinatario del hijo. Cada COM solo puede usarse en una ventana, también durante las grabaciones.',
+  '',
+  'CODEX DESKTOP',
+  'Agent settings (robot de la cabecera) > Codex Desktop > Configure integration. Reconectar MCP o reiniciar Codex si lo solicita.',
+  'Desde el chat destinatario, pedir: Abrí G Monitor para este proyecto. Una ventana abierta con el .cmd todavía no tiene un chat vinculado.',
   '',
   'ANTIGRAVITY',
   'Abrir el icono Agent settings de la cabecera > Antigravity App > Configure integration.',
@@ -49,4 +66,14 @@ await writeFile(join(destination,'LEEME.txt'),'\ufeff'+[
   'Detalles: docs/hybrid-test.md. Después de configurar: .session/claude-plugin/INSTALAR-DESKTOP.txt.',
   'No usar Chat, Cowork, Cloud ni WSL para esta prueba. Detener-G-Monitor.cmd detiene el servicio.'
 ].join('\r\n')+'\r\n');
+// Fail closed if a future copy step accidentally includes local state or credentials.
+async function verify(directory) {
+  for(const entry of await readdir(directory,{withFileTypes:true})) {
+    const path=join(directory,entry.name);
+    if(excluded.test(relative(destination,path)) || ['service.json','http-token'].includes(basename(path))) throw new Error(`Archivo local inesperado en el paquete: ${relative(destination,path)}`);
+    if(entry.isSymbolicLink()) throw new Error(`Enlace inesperado en el paquete: ${relative(destination,path)}`);
+    if(entry.isDirectory()) await verify(path);
+  }
+}
+await verify(destination);
 console.log(`Paquete de prueba listo: ${destination}\nCopiá toda esa carpeta a la otra PC. No contiene tokens ni configuración de esta PC.`);

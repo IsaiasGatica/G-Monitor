@@ -4,7 +4,20 @@ Monitor serie para Windows con logs interactivos, múltiples ventanas e integrac
 
 Conectá tu placa, revisá sus registros y compartí con tu agente el fragmento que necesitás analizar, junto con tu pregunta.
 
-> **En desarrollo.** Actualmente se ejecuta desde el código fuente. El instalador público estará disponible con una futura release.
+> **En desarrollo.** Disponible como paquete portable de prueba para Windows x64. El instalador público estará disponible con una futura release.
+
+## Descargar para probar
+
+Descargá el ZIP `G-Monitor-test-…-win-x64.zip` desde [GitHub Releases](https://github.com/IsaiasGatica/G-Monitor/releases). Elegí el archivo de **Assets**, no **Source code**.
+
+1. Extraé toda la carpeta en una ubicación estable y escribible de tu usuario.
+2. Ejecutá `Abrir-G-Monitor.cmd`, elegí el COM y el baud rate y pulsá **Open**. Para probar sin hardware, elegí **mock**.
+3. Para usar un agente, abrí el botón del robot, ejecutá **Configure integration** y pedile al chat destinatario que abra G Monitor.
+4. Ejecutá `Detener-G-Monitor.cmd` para detener el servicio y todas las ventanas.
+
+Incluye Node.js y las dependencias: no requiere instalar Node.js, npm ni Rust. Necesita **WebView2**, además del driver de tu placa cuando corresponda. No muevas la carpeta después de configurar los agentes ni copies `.session` o `.sessions` desde otra PC o versión.
+
+[Instrucciones completas, actualización y solución de problemas →](docs/test-pc.md)
 
 ## Qué podés hacer
 
@@ -58,6 +71,7 @@ npm test
 ```
 
 - [Integraciones y uso de varios monitores](docs/hybrid-test.md)
+- [Paquete portable: descarga, uso, actualización y generación](docs/test-pc.md)
 - [Arquitectura y contratos MCP/WebSocket](docs/architecture.md)
 
 Podés reportar errores indicando qué intentaste hacer, el resultado esperado y los pasos para reproducirlo. Si adjuntás logs, quitá primero los datos privados.
