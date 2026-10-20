@@ -28,21 +28,6 @@ Incluye Node.js y las dependencias: no requiere instalar Node.js, npm ni Rust. N
 - **Abrir varios monitores.** Usá distintas ventanas para distintos puertos, cada una con su propio log y proyecto.
 - **Ejecutar acciones del proyecto.** Compilá o grabá firmware y filesystem con las herramientas configuradas para tu placa.
 
-## Empezar desde el código
-
-Requisitos: **Windows**, **Node.js 22 o superior**, **Rust estable con MSVC**, **Microsoft C++ Build Tools** con desarrollo de escritorio C++ y **WebView2**.
-
-Desde la carpeta del proyecto:
-
-```powershell
-npm ci
-npm run build
-npm run build:desktop
-npm start
-```
-
-La ventana abre con el puerto cerrado. Elegí el COM y la velocidad de tu dispositivo y pulsá **Open**. El botón **↻** actualiza la lista de puertos. También podés elegir **mock** para trabajar con un dispositivo simulado.
-
 ## Conectar un agente
 
 1. Abrí el panel de agentes desde el **ícono del robot** en la cabecera.
@@ -59,6 +44,21 @@ Cada integración utiliza su conexión local: Codex Desktop se vincula con su ch
 Pulsá **+**, antes del botón de agentes, para abrir otra ventana. Hereda una copia del proyecto y del chat vinculado de la ventana actual, con el log vacío y sin COM seleccionado.
 
 Cambiar o cerrar la ventana padre no modifica el destinatario del hijo. Cada COM puede usarse desde una sola ventana, también mientras se graba firmware. El simulador `mock` admite varias ventanas independientes.
+
+## Empezar desde el código
+
+Requisitos: **Windows**, **Node.js 22 o superior**, **Rust estable con MSVC**, **Microsoft C++ Build Tools** con desarrollo de escritorio C++ y **WebView2**.
+
+Desde la carpeta del proyecto:
+
+```powershell
+npm ci
+npm run build
+npm run build:desktop
+npm start
+```
+
+La ventana abre con el puerto cerrado. Elegí el COM y la velocidad de tu dispositivo y pulsá **Open**. El botón **↻** actualiza la lista de puertos. También podés elegir **mock** para trabajar con un dispositivo simulado.
 
 ## Desarrollo y documentación
 
