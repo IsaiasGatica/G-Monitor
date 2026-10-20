@@ -4,6 +4,8 @@ Monitor serie para Windows con logs interactivos, múltiples ventanas e integrac
 
 Conectá tu placa, revisá sus registros y compartí con tu agente el fragmento que necesitás analizar, junto con tu pregunta.
 
+![Ventana de G Monitor](docs/images/g-monitor.png)
+
 > **En desarrollo.** Disponible como paquete portable de prueba para Windows x64. El instalador público estará disponible con una futura release.
 
 ## Descargar para probar
