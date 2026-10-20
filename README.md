@@ -45,6 +45,8 @@ Pulsá **+**, antes del botón de agentes, para abrir otra ventana. Hereda una c
 
 Cambiar o cerrar la ventana padre no modifica el destinatario del hijo. Cada COM puede usarse desde una sola ventana, también mientras se graba firmware. El simulador `mock` admite varias ventanas independientes.
 
+
+
 ## Empezar desde el código
 
 Requisitos: **Windows**, **Node.js 22 o superior**, **Rust estable con MSVC**, **Microsoft C++ Build Tools** con desarrollo de escritorio C++ y **WebView2**.
